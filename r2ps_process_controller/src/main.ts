@@ -1,9 +1,9 @@
 import * as rclnodejs from "rclnodejs";
-import R2PSControllerServerNode from "./presentation/node";
+import R2PSProcessControllerNode from "./presentation/node";
 
 async function initialize(): Promise<void> {
   await rclnodejs.init();
-  const node: rclnodejs.Node = new R2PSControllerServerNode();
+  const node: rclnodejs.Node = new R2PSProcessControllerNode();
   node.spin();
 }
 

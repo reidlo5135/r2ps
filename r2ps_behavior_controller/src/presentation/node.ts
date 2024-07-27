@@ -1,8 +1,8 @@
 import * as rclnodejs from "rclnodejs";
 
-const NODE_NAME: string = "r2ps_behavior_manager";
+const NODE_NAME: string = "r2ps_behavior_controller";
 
-export default class R2PSBehaviorManagerNode extends rclnodejs.Node {
+export default class R2PSBehaviorControllerNode extends rclnodejs.Node {
 
     constructor() {
         super(NODE_NAME);

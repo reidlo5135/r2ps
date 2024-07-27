@@ -1,9 +1,9 @@
 import * as rclnodejs from "rclnodejs";
-import R2PSBehaviorManagerNode from "./presentation/node";
+import R2PSBehaviorControllerNode from "./presentation/node";
 
 async function initialize(): Promise<void> {
   await rclnodejs.init();
-  const node: rclnodejs.Node = new R2PSBehaviorManagerNode();
+  const node: rclnodejs.Node = new R2PSBehaviorControllerNode();
   node.spin();
 }
 

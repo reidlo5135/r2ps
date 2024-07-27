@@ -1,7 +1,7 @@
 {
-  "name": "r2ps_controller_server",
+  "name": "r2ps_behavior_controller",
   "version": "0.0.1",
-  "description": "ROS2 Process Controller Package",
+  "description": "TODO: Package description",
   "keywords": [],
   "author": "",
   "license": "TODO: License declaration",

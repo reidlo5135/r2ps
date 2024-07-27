@@ -1,7 +1,7 @@
 {
-  "name": "r2ps_behavior_manager",
+  "name": "r2ps_process_controller",
   "version": "0.0.1",
-  "description": "TODO: Package description",
+  "description": "ROS2 Process Controller Package",
   "keywords": [],
   "author": "",
   "license": "TODO: License declaration",
