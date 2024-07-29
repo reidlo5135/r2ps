@@ -1,0 +1,11 @@
+{
+  "name": "r2ps",
+  "version": "0.0.1",
+  "description": "ROS2 Process control package",
+  "scripts": {
+    "g-msgs": "sudo chmod +x ./scripts/g-msgs.sh && ./scripts/g-msgs.sh",
+    "build": "sudo chmod +x ./scripts/configure.sh && ./scripts/configure.sh"
+  },
+  "author": "",
+  "license": "ISC"
+}
