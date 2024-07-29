@@ -1,12 +1,13 @@
 import * as cprocess from "child_process";
 import * as rclnodejs from "rclnodejs";
-import { Node, Options, Publisher, QoS, Timer, r2ps_msgs } from "rclnodejs";
+import { Node, Options, Publisher, Service, ServiceRequestMessage, ServiceResponse, QoS, Timer, r2ps_msgs } from "rclnodejs";
 
 export default class ProcessService {
 
     private _node: Node;
     private currentProcessesCheckTimer: Timer;
     private currentProcessListPublisher: Publisher<"r2ps_msgs/msg/ProcessList">;
+    private processControlService: Service;
 
     constructor(node: Node) {
         this._node = node;
@@ -23,6 +24,12 @@ export default class ProcessService {
             "/r2ps/ps/process/list",
             currentProcessListPublisherOpts
         );
+        
+        this.processControlService = this._node.createService(
+            "r2ps_msgs/srv/ProcessControl",
+            `/${this._node.name()}/ps/control`,
+            this.processControlServiceCallback.bind(this)
+        )
     }
 
     private bindFunctions(): void {
@@ -66,13 +73,17 @@ export default class ProcessService {
                         continue;
                     }
 
-                    console.info(`${stdLine}`);
+                    const stdColumns: string[] = stdLine.trim().split(/\s+/);
 
-                    const columns: string[] = stdLine.trim().split(/\s+/);
+                    if (stdColumns.length > 1) {
+                        console.info("-------------------------");
+                        console.info(`User : ${stdColumns[0]}`);
+                        console.info(`Pid : ${stdColumns[1]}`);
+                        console.info(`Pname : ${stdColumns[11]}`);
+                        console.info("-------------------------\n");
 
-                    if (columns.length > 1) {
-                        const pid: string = columns[1];
-                        const pname: string = columns[11];
+                        const pid: string = stdColumns[1];
+                        const pname: string = stdColumns[11];
                         
                         const currentProcess: r2ps_msgs.msg.Process = rclnodejs.createMessageObject("r2ps_msgs/msg/Process");
                         currentProcess.pid = parseInt(pid, 10);
@@ -93,5 +104,18 @@ export default class ProcessService {
             console.error(`ps error : ${e}`);
             return;
         }
+    }
+
+    private processControlServiceCallback(
+        request: ServiceRequestMessage<"r2ps_msgs/srv/ProcessControl">,
+        response: ServiceResponse<"r2ps_msgs/srv/ProcessControl">
+    ): void {
+        console.info(`behavior : ${JSON.stringify(request.behavior)}`);
+
+        const behavior: r2ps_msgs.msg.Behavior = rclnodejs.createMessageObject("r2ps_msgs/msg/Behavior");
+
+        let result: r2ps_msgs.srv.ProcessControl_Response = response.template;
+        result.result = true;
+        response.send(result);
     }
 }

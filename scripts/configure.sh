@@ -34,4 +34,6 @@ for node_package in "${node_packages[@]}"; do
     cd ../
 done
 
+npm run g-msgs
+
 echo "========== Configure Finished =========="

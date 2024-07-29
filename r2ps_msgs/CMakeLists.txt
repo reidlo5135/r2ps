@@ -15,9 +15,10 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/NodeList.msg"
   "msg/Process.msg"
   "msg/ProcessList.msg"
+  "msg/Behavior.msg"
+  "srv/ProcessControl.srv"
   DEPENDENCIES std_msgs
 )
-
 
 ament_export_dependencies(rosidl_default_generators)
 
