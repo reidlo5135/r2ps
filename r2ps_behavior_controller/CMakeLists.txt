@@ -6,6 +6,8 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(r2ps_msgs REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -15,18 +17,3 @@ if(BUILD_TESTING)
 endif()
 
 ament_package()
-
-install(FILES 
-  package.json
-  DESTINATION share/${PROJECT_NAME}/
- )
- 
-install(DIRECTORY 
-  config
-  dist
-  launch
-  node_modules
-  DESTINATION share/${PROJECT_NAME}/
-  OPTIONAL
- )
- 
