@@ -1,39 +1,28 @@
 #!/bin/bash
 
-apt_packages=("nodejs" "npm")
+source /opt/ros/humble/setup.bash
 
-for package in "${apt_packages[@]}"; do
-  echo "========== [Install] - [$package] =========="
-  sudo apt-get install -y $package || exit
+ros_packages=("r2ps_msgs" "r2ps_behavior_controller" "r2ps_process_controller")
+
+for ros_package in "${ros_packages[@]}"; do
+    echo "========== [Compile] - [$ros_package] =========="
+    cd "./$ros_package" || { echo "Directory $ros_package not found"; exit 1; }
+    colcon build --symlink-install || { echo "Compile Error in $ros_package"; exit 1; }
+    source install/local_setup.bash
+    cd ../
 done
 
-echo "========== [Install] - [n(nodejs)] =========="
-sudo npm i -g n
-sudo n lts
-
-echo "====== [Compile] - [r2ps_msgs] ======"
-cd ./r2ps_msgs
-colcon build --symlink-install
-cd ../
-
-echo "========== [Create] setup.bash =========="
-echo '#!/bin/bash' > ./scripts/setup.bash
-echo 'source ./r2ps_msgs/install/local_setup.bash' >> ./scripts/setup.bash
+echo '========== [Create] setup.bash =========='
+echo '#!/bin/bash' > ./setup.bash
+echo 'ros_packages=("r2ps_msgs" "r2ps_behavior_controller" "r2ps_process_controller")' >> ./setup.bash
+echo 'for ros_package in "${ros_packages[@]}"; do' >> ./setup.bash
+echo 'echo "========== [Source] $ros_package =========="' >> ./setup.bash
+echo 'source ./${ros_package}/install/local_setup.bash' >> ./setup.bash
+echo '========== [Source] setup.bash =========='
+echo 'done' >> ./setup.bash
 
 echo "---------------------"
 cat ./scripts/setup.bash
 echo "---------------------"
-
-node_packages=("r2ps_behavior_controller" "r2ps_process_controller")
-
-for node_package in "${node_packages[@]}"; do
-    echo "========== [Install] - [$node_package] =========="
-    cd "./$node_package" || { echo "Directory $node_package not found"; exit 1; }
-    npm install || { echo "npm install failed in $node_package"; exit 1; }
-    npm run build || { echo "npm run build failed in $node_package"; exit 1; }
-    cd ../
-done
-
-npm run g-msgs
 
 echo "========== Configure Finished =========="

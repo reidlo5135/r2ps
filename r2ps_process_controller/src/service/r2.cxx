@@ -40,17 +40,16 @@ void r2ps::process::R2Service::current_node_check_timer_cb()
                 const bool &contains_daemon = current_node.find("daemon") != std::string::npos;
 
                 return !(contains_r2ps || contains_ros2 || contains_daemon);
-            }
-        );
+            });
 
-        r2ps_msgs::msg::NodeList::SharedPtr node_list = std::make_shared<r2ps_msgs::msg::NodeList>();
+        r2ps_msgs::msg::NodeList::UniquePtr node_list = std::make_unique<r2ps_msgs::msg::NodeList>();
         node_list->set__node_list(std::move(filtered_node_vec));
 
         for (const std::string &node : node_list->node_list)
         {
             RCLCPP_INFO(this->node_->get_logger(), "%s", node.c_str());
         }
-        this->node_list_publisher_->publish(*node_list);
+        this->node_list_publisher_->publish(std::move(*node_list));
     }
     catch (const std::exception &expn)
     {
