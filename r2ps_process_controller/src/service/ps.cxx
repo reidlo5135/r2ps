@@ -5,6 +5,8 @@ r2ps::process::PSService::PSService(rclcpp::Node::SharedPtr node)
     this->node_ = node;
     RCLCPP_INFO(this->node_->get_logger(), "%s registered", "ps service");
 
+    this->r2ps_string_utils_ = std::make_shared<r2ps::utils::String>();
+
     this->process_check_timer_cb_group_ = this->node_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
     this->process_check_timer_ = this->node_->create_wall_timer(
         std::chrono::milliseconds(500),
@@ -22,18 +24,6 @@ r2ps::process::PSService::PSService(rclcpp::Node::SharedPtr node)
 
 r2ps::process::PSService::~PSService()
 {
-}
-
-std::vector<std::string> r2ps::process::PSService::split(const std::string &str, char delimiter)
-{
-    std::vector<std::string> tokens;
-    std::stringstream ss(str);
-    std::string token;
-    while (std::getline(ss, token, delimiter))
-    {
-        tokens.push_back(token);
-    }
-    return tokens;
 }
 
 std::string r2ps::process::PSService::exec_command(const char *command)
@@ -81,14 +71,14 @@ void r2ps::process::PSService::process_check_timer_cb()
     try
     {
         r2ps_msgs::msg::ProcessList::UniquePtr process_list = std::make_unique<r2ps_msgs::msg::ProcessList>();
-        std::vector<r2ps_msgs::msg::Process> processes;
+        std::vector<r2ps_msgs::msg::Process> process_vec;
 
         const char *ros_process_command = "ps aux | grep ros";
         const std::string ros_process_output = this->exec_command(ros_process_command);
 
         if (ros_process_output != "")
         {
-            std::vector<std::string> lines = split(ros_process_output, '\n');
+            std::vector<std::string> lines = this->r2ps_string_utils_->split(ros_process_output, '\n');
 
             for (const std::string &line : lines)
             {
@@ -96,33 +86,34 @@ void r2ps::process::PSService::process_check_timer_cb()
                     line.find("_ros2") != std::string::npos ||
                     line.find("daemon") != std::string::npos ||
                     line.find("echo") != std::string::npos ||
-                    line.find("grep") != std::string::npos)
+                    line.find("grep") != std::string::npos ||
+                    line.find("/opt/ros/") != std::string::npos)
                 {
                     continue;
                 }
 
-                std::vector<std::string> words = split(line, ' ');
+                std::vector<std::string> words = this->r2ps_string_utils_->split(line, ' ');
                 words.erase(std::remove(words.begin(), words.end(), ""), words.end());
+
+                r2ps_msgs::msg::Process::UniquePtr process = std::make_unique<r2ps_msgs::msg::Process>();
 
                 if (words.size() >= 1)
                 {
-                    r2ps_msgs::msg::Process::UniquePtr process = std::make_unique<r2ps_msgs::msg::Process>();
-
-                    const std::string &process_id = words[1];
+                    const int32_t &process_id = this->r2ps_string_utils_->parse_int(words[1]);
                     const std::string &process_name = words[11];
 
-                    process->set__pid(std::stoi(process_id));
+                    process->set__pid(process_id);
                     process->set__pname(process_name);
-                    processes.push_back(std::move(*process));
+                    process_vec.push_back(std::move(*process));
                 }
-
-                process_list->set__process_list(processes);
-                this->process_list_publisher_->publish(std::move(*process_list));
             }
+
+            process_list->set__process_list(std::move(process_vec));
+            this->process_list_publisher_->publish(std::move(*process_list));
         }
     }
     catch (const std::exception &e)
     {
-        std::cerr << e.what() << '\n';
+        RCLCPP_ERROR(this->node_->get_logger(), "Failed to run command: %s", e.what());
     }
 }

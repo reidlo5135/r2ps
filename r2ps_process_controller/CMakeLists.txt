@@ -13,6 +13,7 @@ include_directories(
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(r2ps_msgs REQUIRED)
+find_package(r2ps_utils REQUIRED)
 
 set(SOURCES
   src/controller/controller.cxx
@@ -24,6 +25,7 @@ set(SOURCES
 set(DEPENDS
   rclcpp
   r2ps_msgs
+  r2ps_utils
 )
 
 set(EXEC_NAME r2ps_process_controller)

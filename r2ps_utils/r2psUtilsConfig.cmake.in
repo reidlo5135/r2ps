@@ -1,0 +1,6 @@
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/r2psUtilsTargets.cmake")
+
+check_required_components(rclcpp)
+check_required_components(std_msgs)
