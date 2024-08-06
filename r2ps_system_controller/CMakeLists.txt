@@ -23,6 +23,8 @@ set(SOURCES
 
 set(DEPENDS
   rclcpp
+  r2ps_msgs
+  r2ps_utils
 )
 
 set(EXEC_NAME r2ps_system_controller)

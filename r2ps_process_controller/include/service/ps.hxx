@@ -7,6 +7,7 @@
 #include <r2ps_msgs/msg/process.hpp>
 #include <r2ps_msgs/msg/process_list.hpp>
 #include <r2ps_utils/string.hxx>
+#include <r2ps_utils/process.hxx>
 
 #define PS_EF "ps -ef"
 #define PROCESS_LIST_TOPIC "/r2ps/ps/process/list"
@@ -20,6 +21,7 @@ namespace r2ps
         private:
             rclcpp::Node::SharedPtr node_;
             r2ps::utils::String::SharedPtr r2ps_string_utils_;
+            r2ps::utils::Process::SharedPtr r2ps_process_utils_;
 
             rclcpp::CallbackGroup::SharedPtr process_check_timer_cb_group_;
             rclcpp::TimerBase::SharedPtr process_check_timer_;
@@ -28,7 +30,6 @@ namespace r2ps
             rclcpp::Publisher<r2ps_msgs::msg::ProcessList>::SharedPtr process_list_publisher_;
 
         private:
-            std::string exec_command(const char *command);
             void process_check_timer_cb();
 
         public:

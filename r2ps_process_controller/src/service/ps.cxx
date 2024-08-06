@@ -6,6 +6,7 @@ r2ps::process::PSService::PSService(rclcpp::Node::SharedPtr node)
     RCLCPP_INFO(this->node_->get_logger(), "%s registered", "ps service");
 
     this->r2ps_string_utils_ = std::make_shared<r2ps::utils::String>();
+    this->r2ps_process_utils_ = std::make_shared<r2ps::utils::Process>();
 
     this->process_check_timer_cb_group_ = this->node_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
     this->process_check_timer_ = this->node_->create_wall_timer(
@@ -26,46 +27,6 @@ r2ps::process::PSService::~PSService()
 {
 }
 
-std::string r2ps::process::PSService::exec_command(const char *command)
-{
-    try
-    {
-        const int &command_result = system(command);
-
-        if (command_result == 0)
-        {
-            FILE *pipe = popen(command, "r");
-            if (!pipe)
-            {
-                RCLCPP_ERROR(this->node_->get_logger(), "Failed to run command: %s", command);
-                return "";
-            }
-
-            char buffer[128];
-            std::string result = "";
-
-            while (fgets(buffer, sizeof(buffer), pipe) != nullptr)
-            {
-                result += buffer;
-            }
-
-            const int &exit_status = pclose(pipe);
-
-            return result;
-        }
-        else
-        {
-            RCLCPP_ERROR(this->node_->get_logger(), "Failed to run command: %s", command);
-            return "";
-        }
-    }
-    catch (const std::exception &e)
-    {
-        RCLCPP_ERROR(this->node_->get_logger(), "Failed to run command: %s", command);
-        return "";
-    }
-}
-
 void r2ps::process::PSService::process_check_timer_cb()
 {
     try
@@ -74,7 +35,7 @@ void r2ps::process::PSService::process_check_timer_cb()
         std::vector<r2ps_msgs::msg::Process> process_vec;
 
         const char *ros_process_command = "ps aux | grep ros";
-        const std::string ros_process_output = this->exec_command(ros_process_command);
+        const std::string ros_process_output = this->r2ps_process_utils_->execute_command(ros_process_command);
 
         if (ros_process_output != "")
         {
