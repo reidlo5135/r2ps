@@ -15,8 +15,8 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 
 set(SOURCES
-  src/r2ps_utils/string.cxx
-  src/r2ps_utils/process.cxx
+  src/r2ps_utils/string.cpp
+  src/r2ps_utils/process.cpp
 )
 
 set(LIB_NAME r2ps_utils)

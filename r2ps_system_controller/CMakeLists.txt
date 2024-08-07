@@ -16,9 +16,10 @@ find_package(r2ps_msgs REQUIRED)
 find_package(r2ps_utils REQUIRED)
 
 set(SOURCES
-  src/controller/controller.cxx
-  src/service/usb.cxx
-  src/main.cxx
+  src/usb_manager.cpp
+  src/service_manager.cpp
+  src/system_controller.cpp
+  src/main.cpp
 )
 
 set(DEPENDS
@@ -30,9 +31,7 @@ set(DEPENDS
 set(EXEC_NAME r2ps_system_controller)
 
 add_executable(${EXEC_NAME}
-  src/controller/controller.cxx
-  src/service/usb.cxx
-  src/main.cxx
+  ${SOURCES}
 )
 
 ament_target_dependencies(${EXEC_NAME}
