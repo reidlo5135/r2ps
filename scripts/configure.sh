@@ -2,27 +2,16 @@
 
 source /opt/ros/humble/setup.bash
 
-ros_packages=("r2ps_msgs" "r2ps_utils" "r2ps_behavior_controller" "r2ps_process_controller")
+setup_packages=("r2ps_msgs" "r2ps_utils")
 
-for ros_package in "${ros_packages[@]}"; do
-    echo "========== [Compile] - [$ros_package] =========="
-    cd "./$ros_package" || { echo "Directory $ros_package not found"; exit 1; }
-    colcon build --symlink-install || { echo "Compile Error in $ros_package"; exit 1; }
-    source install/local_setup.bash
-    cd ../
+for setup_packages in "${setup_package[@]}"; do
+    echo "========== [Compile] - [$setup_package] =========="
+    colcon build --packages-select ${setup_package} || { echo "Compile Error in $ros_package"; exit 1; }
+    source install/setup.bash
 done
 
-echo '========== [Create] setup.bash =========='
-echo '#!/bin/bash' > ./scripts/setup.bash
-echo 'ros_packages=("r2ps_msgs" "r2ps_utils" "r2ps_behavior_controller" "r2ps_process_controller")' >> ./scripts/setup.bash
-echo 'for ros_package in "${ros_packages[@]}"; do' >> ./scripts/setup.bash
-echo 'echo "========== [Source] $ros_package =========="' >> ./scripts/setup.bash
-echo 'source ./${ros_package}/install/local_setup.bash' >> ./scripts/setup.bash
-echo '========== [Source] setup.bash =========='
-echo 'done' >> ./scripts/setup.bash
-
-echo "---------------------"
-cat ./scripts/setup.bash
-echo "---------------------"
+source install/setup.bash
+colcon build --symlink-install
+source install/local_setup.bash
 
 echo "========== Configure Finished =========="

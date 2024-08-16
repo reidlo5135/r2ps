@@ -13,10 +13,12 @@ include_directories(
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(builtin_interfaces REQUIRED)
 
 set(SOURCES
   src/r2ps_utils/string.cpp
   src/r2ps_utils/process.cpp
+  src/r2ps_utils/message.cpp
 )
 
 set(LIB_NAME r2ps_utils)
@@ -24,6 +26,7 @@ set(LIB_NAME r2ps_utils)
 set(DEPENDS
   rclcpp
   std_msgs
+  builtin_interfaces
 )
 
 add_library(${LIB_NAME} SHARED

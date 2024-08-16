@@ -8,7 +8,9 @@
 #include <chrono>
 #include <rclcpp/rclcpp.hpp>
 #include <r2ps_msgs/msg/node_list.hpp>
+#include <r2ps_utils/message.hpp>
 
+#define FRAME_ID "r2ps"
 #define NODE_LIST_TOPIC "/r2ps/r2/node/list"
 
 namespace r2ps
@@ -19,6 +21,8 @@ namespace r2ps
         {
         private:
             rclcpp::Node::SharedPtr node_;
+
+            r2ps::utils::Message::SharedPtr r2ps_message_utils_;
 
             rclcpp::CallbackGroup::SharedPtr current_node_check_timer_cb_group_;
             rclcpp::TimerBase::SharedPtr current_node_check_timer_;

@@ -5,6 +5,8 @@ r2ps::process::R2Service::R2Service(rclcpp::Node::SharedPtr node)
     this->node_ = node;
     RCLCPP_INFO(this->node_->get_logger(), "%s registered", "r2 service");
 
+    this->r2ps_message_utils_ = std::make_shared<r2ps::utils::Message>();
+
     this->current_node_check_timer_cb_group_ = this->node_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
     this->current_node_check_timer_ = this->node_->create_wall_timer(
         std::chrono::milliseconds(500),
@@ -43,12 +45,19 @@ void r2ps::process::R2Service::current_node_check_timer_cb()
             });
 
         r2ps_msgs::msg::NodeList::UniquePtr node_list = std::make_unique<r2ps_msgs::msg::NodeList>();
+        const std_msgs::msg::Header &header = this->r2ps_message_utils_->build_header(FRAME_ID);
+        node_list->set__header(header);
         node_list->set__node_list(std::move(filtered_node_vec));
 
+        RCLCPP_INFO(this->node_->get_logger(), "---------------------- R2 Node List ----------------------\n");
+        int node_idx = 0;
         for (const std::string &node : node_list->node_list)
         {
-            RCLCPP_INFO(this->node_->get_logger(), "%s", node.c_str());
+            RCLCPP_INFO(this->node_->get_logger(), "[%d] - [%s]\n", node_idx, node.c_str());
+            ++node_idx;
         }
+        RCLCPP_INFO(this->node_->get_logger(), "----------------------------------------------------------\n");
+
         this->node_list_publisher_->publish(std::move(*node_list));
     }
     catch (const std::exception &expn)

@@ -7,6 +7,7 @@ r2ps::process::PSService::PSService(rclcpp::Node::SharedPtr node)
 
     this->r2ps_string_utils_ = std::make_shared<r2ps::utils::String>();
     this->r2ps_process_utils_ = std::make_shared<r2ps::utils::Process>();
+    this->r2ps_message_utils_ = std::make_shared<r2ps::utils::Message>();
 
     this->process_check_timer_cb_group_ = this->node_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
     this->process_check_timer_ = this->node_->create_wall_timer(
@@ -34,7 +35,7 @@ void r2ps::process::PSService::process_check_timer_cb()
         r2ps_msgs::msg::ProcessList::UniquePtr process_list = std::make_unique<r2ps_msgs::msg::ProcessList>();
         std::vector<r2ps_msgs::msg::Process> process_vec;
 
-        const char *ros_process_command = "ps aux | grep ros";
+        const char *ros_process_command = "ps aux | grep ros | grep -Ev 'ros2cli|echo|/usr/bin/cmake|/usr/bin/c++'";
         const std::string ros_process_output = this->r2ps_process_utils_->execute_command(ros_process_command);
 
         if (ros_process_output != "")
@@ -47,8 +48,7 @@ void r2ps::process::PSService::process_check_timer_cb()
                     line.find("_ros2") != std::string::npos ||
                     line.find("daemon") != std::string::npos ||
                     line.find("echo") != std::string::npos ||
-                    line.find("grep") != std::string::npos ||
-                    line.find("/opt/ros/") != std::string::npos)
+                    line.find("grep") != std::string::npos)
                 {
                     continue;
                 }
@@ -61,14 +61,33 @@ void r2ps::process::PSService::process_check_timer_cb()
                 if (words.size() >= 1)
                 {
                     const int32_t &process_id = this->r2ps_string_utils_->parse_int(words[1]);
-                    const std::string &process_name = words[11];
+                    std::string process_name = "";
+
+                    if (line.find("/opt/ros") != std::string::npos)
+                    {
+                        if (words[13] != "")
+                        {
+                            process_name = words[13];
+                        }
+                        else
+                        {
+                            process_name = words[10];    
+                        }
+                    }
+                    else
+                    {
+                        process_name = words[11];
+                    }
 
                     process->set__pid(process_id);
                     process->set__pname(process_name);
+
                     process_vec.push_back(std::move(*process));
                 }
             }
 
+            const std_msgs::msg::Header &header = this->r2ps_message_utils_->build_header(FRAME_ID);
+            process_list->set__header(header);
             process_list->set__process_list(std::move(process_vec));
             this->process_list_publisher_->publish(std::move(*process_list));
         }

@@ -8,7 +8,9 @@
 #include <r2ps_msgs/msg/process_list.hpp>
 #include <r2ps_utils/string.hpp>
 #include <r2ps_utils/process.hpp>
+#include <r2ps_utils/message.hpp>
 
+#define FRAME_ID "r2ps"
 #define PS_EF "ps -ef"
 #define PROCESS_LIST_TOPIC "/r2ps/ps/process/list"
 
@@ -22,6 +24,7 @@ namespace r2ps
             rclcpp::Node::SharedPtr node_;
             r2ps::utils::String::SharedPtr r2ps_string_utils_;
             r2ps::utils::Process::SharedPtr r2ps_process_utils_;
+            r2ps::utils::Message::SharedPtr r2ps_message_utils_;
 
             rclcpp::CallbackGroup::SharedPtr process_check_timer_cb_group_;
             rclcpp::TimerBase::SharedPtr process_check_timer_;
